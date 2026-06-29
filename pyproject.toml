@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpu-hype"
+version = "0.1.0"
+description = "GPU-accelerated multi-objective calibration and probabilistic forecasting for the HYPE hydrological model"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+authors = [
+    { name = "Rui Marinheiro", email = "ruismarinheiro@tecnico.ulisboa.pt" },
+    { name = "FORESIGHT", email = "jose.matos@tecnico.ulisboa.pt" },
+]
+keywords = ["hydrology", "HYPE", "calibration", "PSO", "GPU", "OpenCL", "ensemble", "probabilistic", "forecasting"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=1.24,<2.0",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "scikit-learn>=1.0",
+    "matplotlib>=3.7",
+    "mpld3",
+    "pyopencl",
+    "setuptools",
+]
+
+[project.urls]
+Homepage = "https://foresight.tecnico.ulisboa.pt/"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "jupyter>=1.0",
+    "ipykernel>=6.0",
+    "openpyxl",
+]
+# Advanced verification metrics / hydrograph diagnostics (functions2.py) reuse the
+# companion `forecast_performance` package. Only this optional path needs it.
+metrics = [
+    "forecast-performance",
+]
+
+[tool.setuptools]
+py-modules = [
+    "gpu",
+    "gpu_pso",
+    "data",
+    "functions",
+    "functions2",
+    "new_error_model",
+    "openCL",
+    "crowding",
+    "domination",
+    "DisplayPKL",
+    "Trainer",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["conceptual*", "error*", "regression*"]
+
+[tool.setuptools.package-data]
+error = ["*.cl"]
+regression = ["*.cl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

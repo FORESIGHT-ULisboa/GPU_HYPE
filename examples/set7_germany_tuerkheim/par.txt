@@ -1,0 +1,157 @@
+!!	----GENERAL----!!
+ttpd	1
+ttpi	1
+rcgrw	0
+cevpam	0
+cevpph	0
+lp	0.99692
+gratk	1.41599
+gratp	2.73936
+rivvel	0.88498
+damp	0.81156
+srnlayer	3
+srbeta	1
+tcalt	0.6
+!!	Must be zero if tobselev is used, otherwise you get a double correction
+tcelevadd	0.00796
+!!	New parameter used for elevation correction of temperature data from the Tobs elevation (given in ForcKey.txt) to the subbasin mean elevation
+tcobselev	0
+pcaddg	0
+pcelevadd	4.27728
+pcelevth	0
+pcelevmax	0
+gldepi	5
+epotdist	3.5
+sdnsnew	0.13
+snowdensdt	0.0016
+sswcorr	0.66
+iwdfrac	1
+regirr	1
+irrdemand	0
+immdepth	30
+limqprod	0
+rrcs3	0.01284
+qmean	200
+!!	LANDUSE ----!! Lake Glacier, permanent snow Sealed urban and industrial Semi-urban and non-sealed industrial Deciduous forest Coniferous forest Mixed forest Agriculture - rainfed Agriculture - irrigated Agriculture - permanent crops Pasture - rainfed Open with vegetation Open with no or sparse vegetation Wetland River Mediterranean open with vegetation Mediterranean broad-leaved forest Mediterranean coniferous forest Mediterranean mixed forest Northern deciduous forest Pasture - irrigated
+cmlt	1.22880957605	2.3765004135	0.15314882848	0.07210932597	2.62526906848	2.89283334626	0.38338012698	1.66029178822	0.87335648406	3.06933034664	0.75575278723
+ttmp	0.60363	-3.23737	-0.36322	0.49636	-0.68049	4.56233	-0.41659	-4.41334	-1.82419	-2.67824	2.5273
+frost	2	2	2	2	2	2	2	2	2	2	2
+srrcs	0.59904	0.1273	0.43667	0.17936	0.0175	0.67348	0.16362	0.43176	0.30602	0.15098	0.42478
+cmrad	0.48	0.48	0.48	0.48	0.48	0.48	0.48	0.48	0.48	0.48	0.48
+snalbmin	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45
+snalbmax	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85
+snalbkexp	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1
+!!	----PARAMETER REGION----!!
+tempcorr	0.14068	0.14068	0.14068	0.14068	0.14068	0.14068	0.14068	0.14068
+preccorr	-0.1	0.2	-0.2	-0.1757	-0.1	0	0.1	0.2
+pirrs	0.3	0.3	0.3	0.3	0.3	0.3	0.3	0.3
+pirrg	0.05	0.05	0.05	0.05	0.05	0.05	0.05	0.05
+!!	----------------------------------------------------------------------------------
+!!	----SOIL----!! Coarse Medium Fine Organic No texture rock lakes Shallow Moraine Fine for rice
+wcwp	0.06939380213	0.0990593154	0.02329457692	0.14409394715	0.16662787964
+wcfc	0.136773162827	0.151918127051	0.037513092253	0.162041695919	0.004685600925
+wcep	0.52936017682	0.25794457724	0.157670819	0.28945681622	0.12001147499
+trrcs	0.045	0.062	0.45	0.15	0.15
+!!	srrate	0.24688	0.25361	0.15788	0.08776	0.05343
+sfrost	1	1	1	1	1
+rrcs2	0.46721	0.20537	0.18878	0.53191	0.4667
+rrcs1	0.53782	0.47479	0.50161	0.07772	0.02665
+mperc2	66.056	56.82195	80.14341	25.55592	103.50703
+mperc1	66.056	56.82195	80.14341	25.55592	103.50703
+mactrsm	0.49966	0.49985	0.01663	0.21295	0.97981
+!!	mactrinf	26.83058	27.69493	78.05716	90.31663	8.29731
+!!	macrate	0.1767	0.25865	0.39049	0.41739	0.31064
+macfrac	1	1	1	1	1	1
+!!	----------------------------------------------------------------------------------
+!!	Snow cover fraction parameters
+fscmax	0.95
+fscmin	0.01
+fsclim	0.001
+fsck1	0.2
+fsckexp	0.000001
+!!	--- Landuse dependent ---
+fscdistmax	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8
+fscdist0	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6
+fscdist1	0.001	0.001	0.001	0.001	0.001	0.001	0.001	0.001	0.001	0.001	0.001
+!!	----------------------------------------------------------------------------------
+!!	Glacier model general parameters
+!!	volume area-scaling parameters for two glacier types
+!!	volume-area-scaling using units m2->m3
+!!	the following values are from literature (calibrated for all available glacier data on the globe)
+!!	glacvcoef Coefficient glacier volume-area relationship (default 0.205)
+!!	glacvexp Exponent glacier volume-area relationship (default 1.375)
+!!	glacdens Glacier density (default 0.85 m3 water/m3 ice)
+!!	glacvcoef2 Coefficient glacier volume-area relationship, type 2 glacier (default 1.701)
+!!	glacvexp2 Exponent glacier volume-area relationship, type 2 glacier (default 1.25)
+!!	glac2arlim (km2) Area limit to separate glacier type 1 (Glaciers or Small) from type 2 (Ice Caps or Large)
+!!	Glacier volume-area scaling (recalibrated using the RGIv4 data and regional estimated total ice volumes from Huss&Farinotti(2012) /David, 20160202)
+!!
+!!	exponent for glaciers, should be considered a global constant
+glacvexp	1.375
+!!	linear coef for glaciers, calibrated offline as described above
+glacvcoef	0.17157
+!!	exponent for ice caps, should be considered a global constant
+glacvexp1	1.25
+!!	linear coef for ice caps, calibrated offline as described above
+glacvcoef1	2.88364
+!!
+!!	Glacier type
+!!
+!!	area threshold which is used to set glacier type - used only if glacier type is missing in GlacierData.txt
+glac2arlim	25000000
+!!
+!!	Glacier ice volume initialization
+!!
+!!	annual mass balance (mm/year) used for modifying initial glacier volume, depending on the age of SLC information (glacdate in glacierdata) and start of simulation
+glacannmb	0
+!!	-----
+!!	Glacier melt parameters, calibrated from WGMS data in Arctic-HYPE v3.0.26 (please note that the snow melt in the glacier class is using the landuse melt parameters as usual)
+!!	----
+glacttmp	-5
+glaccmlt	10
+glaccmrad	0.19090136
+glaccmrefr	0.06259448
+glacalb	0.35
+!!
+!!	-----
+!!
+!!	Fraction of potential evapotranspiration used for Glacier subimation
+fepotglac	0
+!!	----------------------------------------------------------------------------------
+!!	Optional Potential Evapotranspiration Parameters
+!!	----------------------------------------------------------------------------------
+!!	Jensen-Haise temperature addition parameter (Oudin et al suggested a value of 5)
+jhtadd	0.7
+!!	Jensen-Haise temperature scaling parameter (Oudin et al suggested a value of 100)
+jhtscale	68
+!!	LANDUSE ----!! Lake Glacier, permanent snow Sealed urban and industrial Semi-urban and non-sealed industrial Deciduous forest Coniferous forest Mixed forest Agriculture - rainfed Agriculture - irrigated Agriculture - permanent crops Pasture - rainfed Open with vegetation Open with no or sparse vegetation Wetland River Mediterranean open with vegetation Mediterranean broad-leaved forest Mediterranean coniferous forest Mediterranean mixed forest Northern deciduous forest Pasture - irrigated
+!!	kc = crop coefficient used to scale the reference PET values (should thus be close to 1)
+kc	0.84053	0.69173	0.85018	1.50282	0.87936	1.11792	1.25483	0.90465	0.98673	1.03645	1.28723
+!!	----------------------------------------------------------------------------------
+!!	Soiltemp
+deepmem	1000
+surfmem	17.8	5.15	5.15	17.8	17.8	17.8	5.15	5.15	5.15	17.8	5.15
+depthrel	1.1152	2.47	2.47	1.1152	1.1152	1.1152	2.47	2.47	2.47	1.1152	2.47
+!!
+!!	----------------------------------------------------------------------------------
+!!	Regional Aquifer Parameters
+!!	----------------------------------------------------------------------------------
+!!	----SOIL----!! Coarse Medium Fine Organic No texture rock lakes Shallow Moraine Fine for rice
+rcgrwst	0.05	0.05	0.05	0.05	0.05
+!!	-----------------------------------------------------------------------------------------
+!!	Lake ice parameters
+!!	-----------------------------------------------------------------------------------------
+!!	lake ice, water temperature melt efficiency
+licewme	0.1
+!!	lake ice, freezing temperature
+licetf	0
+!!	lake ice, snow compaction parameter
+licesndens	0.0024
+!!	lake ice, ki/ka
+licekika	10
+!!	lake ice, ks = ki*(dsnow(dice)^kexp
+licekexp	1.25
+!!	lake ice, degreeday factor for ice melt
+licetmelt	1.25
+!!	lake ice, snow fall reduction for winddrift (multiplicative)
+licewcorr	0.5

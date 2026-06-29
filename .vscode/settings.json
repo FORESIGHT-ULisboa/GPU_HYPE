@@ -1,0 +1,18 @@
+{
+    "python.defaultInterpreterPath": "${env:CONDA_PREFIX}\\python.exe",
+    "python.condaPath": "conda",
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests/"
+    ],
+    "python.testing.unittestEnabled": false,
+    "jupyter.notebookFileRoot": "${workspaceFolder}",
+    "jupyter.debugJustMyCode": false,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/*.egg-info": true
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
+}

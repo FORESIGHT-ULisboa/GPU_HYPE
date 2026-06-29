@@ -1,0 +1,92 @@
+!!
+!!	Calculation settings:
+!!	---------------------
+!!	indatacheckonoff 3 !! Run this check once, then comment out this row
+!!	indatachecklevel 2
+bdate	1980-01-01
+cdate	1980-01-01
+edate	1999-12-31
+resultdir	./results/
+instate	n
+readdaily	y
+submodel	n
+readobsid	n
+calibration	n
+parensemble	n
+regestimate	n
+!!	--------------------------------------------------------------
+!!	Enable/disable optional input files y/n (SFobs.txt, SWobs.txt)
+!!	--------------------------------------------------------------
+readsfobs	n
+readswobs	n
+readtminobs	n
+readtmaxobs	n
+!!	---------------------------------------------------------------
+!!	Select optional submodels for:
+!!
+!!	snowfallmodel:
+!!	0 threshold temperature model
+!!	1 inputdata (SFobs.txt)
+!!	snowmeltmodel:
+!!	0 temperature index (with or without snowcover scaling)
+!!	2 temperature + radiation index (with snowcover scaling)
+!!
+!!	petmodel: (potential evapotranspiration)
+!!	0 original HYPE temperature model (with Xobs epot replacement)
+!!	1 original HYPE temperature model (without Xobs epot replacement)
+!!	2 Modified Jensen-Haise
+!!	3 Modified Hargreaves-Samani
+!!	4 Priestly-Taylor
+!!	5 FAo Penman-Monteith
+!!
+!!	glaciermodel:
+!!	0 original glacier model for subbasins with slc3>0
+!!	1 same as 0, but simulates the special glaciers specified in GlacierData.txt as well.
+!!	The GlacierData-glaciers are independent from the subbasin glaciers, and does not
+!!	influence the hydrological model. However, they can be used for calibration of the
+!!	glacier model parameters.
+!!	---------------------------------------------------------------
+!!	temperature threshold model
+modeloption snowfallmodel	0
+!!	temperature index, with snow cover scaling (reduced snow melt when snow cover area < 1)
+modeloption snowmeltmodel	0
+!!	Jensen-Haise following Oudin et al
+modeloption petmodel	2
+!!	aquifer routine switched off
+modeloption deepground	0
+!!	Standard method
+modeloption lakeriverice	2
+!!	Simple temperature estimate used in WQ calcs. (not T2)
+modeloption swtemperature	0
+!!	Start of growing season calculated with GDD method
+modeloption growthstartmodel	1
+!!	infiltration and percolation added to storages after Q calculation (classic HYPE)
+modeloption infiltration	2
+!! infiltration based on soil moisture
+modeloption	surfacerunoff	1
+!!	glaciermodel 0
+!!	--------------
+!!	Result output:
+!!	--------------
+!!	meanperiod 1=daymean, 2=weekmean, 3=monthmean, 4=yearmean, 5=total period mean
+basinoutput variable	cout
+basinoutput	meanperiod	1
+basinoutput	subbasins	50675
+!!	mapoutput variable	crun cout cprc ctmp evap snow cinf soim upsnow upevap upcprc upsoim upctmp
+!!	mapoutput signfigures	5
+!!	mapoutput meanperiod	5
+!!	crit meanperiod	1
+!!	crit datalimit	3
+!!	crit 1 criterion	MR2
+!!	crit 1 cvariable	cout
+!!	crit 1 rvariable	rout
+!!	crit 1 weight	1
+!!	crit 2 criterion	MRE
+!!	crit 2 cvariable	cout
+!!	crit 2 rvariable	rout
+!!	crit 2 weight	1
+!!	crit 3 criterion	SMB
+!!	crit 3 cvariable	cout
+!!	crit 3 rvariable	rout
+!!	crit 3 weight	1
+!!	writeformat 0

@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.pixi/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Editor / OS
+.env
+.envrc
+tempCodeRunnerFile.py
+.DS_Store
+
+# ---- GPU_HYPE run outputs ----
+# Calibration / prediction runs and the temporary HYPE folders the wrapper spawns
+Simulations/
+Predictions/
+Performance/
+*.pplot
+# HYPE writes per-basin results into <HypeFolder>/results/ when it runs
+examples/set7_germany_tuerkheim/results/*.txt
+
+# Models / forecasts produced by the notebooks (the bundled pre-trained model is committed by name)
+examples/my_*.pkl
+examples/predictions.csv
+examples/_verify*

@@ -1,0 +1,18 @@
+resultdir		.\results\
+submodel		N
+bdate      		2001-01-01
+cdate      		2001-01-01
+edate      		2001-12-31
+basinoutput variable	cout
+basinoutput	meanperiod	1
+basinoutput	subbasins	3587
+crit meanperiod	1
+crit datalimit	3
+crit 1 criterion	MR2
+crit 1 cvariable	cout
+crit 1 rvariable	rout
+crit 1 weight		1
+crit 2 criterion	MRE
+crit 2 cvariable	cout
+crit 2 rvariable	rout
+crit 2 weight		1

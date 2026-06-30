@@ -69,22 +69,12 @@ def run_model(cls_instance, parameters):
 
     return outputvalues
 
-# def lin_comp_dec(func):
-#     def wrapper(*args, **kwargs):
-#         weights = args[0].parList.copy()
-#         m = weights[:, 0]*5 -2.5
-#         b = weights[:, 1]*100-50
-#         serie = pd.read_csv(r'C:\Users\ruism\RunHYPE\Independent-GPU\DefaultHYPEfolder\TimeCOUT.txt', sep='\t', skiprows=0, header=1, index_col='DATE', parse_dates=True)
-#         serie = serie.values
-#         results = m*serie + b
-#         return results
-#     return wrapper
 
 class HYPE():
     '''Model class for HYPE. Made to run inside GPU'''
 
-    def __init__(self, parList=[], MultipleRuns=10, records=0, calibration_parameters=[], random=True, normalization=True, log=False, 
-                 HYPEfolder=r'HYPEFolder', outfile='timeCOUT.txt', **kwargs):
+    def __init__(self, parList=[], MultipleRuns=10, records=None, calibration_parameters=[], random=True, normalization=True, log=False, 
+                 HYPEfolder=r'HYPEFolder', outfile='timeCOUT.txt', parameter_bounds=None, **kwargs):
 
         self.parList = parList #List of values of the parameters to be optimized. Can appear more than one to the same parName
         self.parNames = [] #List of the names of the parameters to be optimized 
@@ -96,109 +86,76 @@ class HYPE():
         self.outputfile = outfile #Output file to be used in the model
         self.pool = None
 
-        #Auto proposed bound values
-        # self.parametersBounds = {
-        #     'wcfc': [0.0001, 1, False, 'multiply'], 
-        #     'wcep': [0.0001, 1, True, 'multiply'],
-        #     'wcwp': [0.0001, 1, True, 'multiply'],
-        #     'rivvel': [0.0000001, 10000, True],
-        #     'wcfc1': [0.0001, 1, True],
-        #     'wcfc2': [0.0001, 1, True],
-        #     'wcfc3': [0.0001, 1, True],
-        #     'rrcs1': [0.0001, 5, False, 'multiply'],
-        #     'preccorr':[-1, 10, False, 'substitute'],
-        #     # 'rrcs1': [0.001, 10],
-        #     'epotdist': [5, 20, False, 'substitute'],
-        #     'rrcs2': [0.001, 5, True, 'multiply'],
-        #     'rrcs3': [0.001, 100, False, 'multiply'],
-        #     'mperc1': [0.001, 10, True, 'multiply'],
-        #     'mperc2': [0.001, 10, True, 'multiply'],
-        #     'mactrinf': [0.001, 100, True, ],
-        #     'macrate': [0.001, 1, True],
-        #     'srrate': [0.001, 1, False, 'substitute'],
-        #     'jhtadd': [0.001, 5, True],
-        #     'jhtscale': [40, 120],
-        #     'rcgrwst': [0.001, 10],
-        #     'trrcs': [0.001, 30], 
-        #     'mactrsm': [0.001, 1], #Fraction
-        #     'rcgrw': [0.001, 30], 
-        #     'lp': [0.001, 30],
-        #     'damp': [0.001, 1], #Fraction
-        #     'tcalt': [0.001, 2],
-        #     'tcelevadd': [0.001, 2],
-        #     'pcaddg': [0.001, 10],
-        #     'pcelevadd': [0.001, 15],
-        #     'gldepi': [0.001, 15], 
-        #     'qmean': [0.001, 500],
-        #     'kc': [0.001, 25, False, 'multiply'],
-        # }
         #From Gabinete set
-        self.parametersBounds = {
-            'wcfc': [0.0001, 1, True, 'multiply'], 
-            #'wcfc': [0.0001, 1, False, 'multiply'],
-            'rrcs1': [0.0001, 5, True, 'multiply'],
-            'preccorr':[-1, 15, False, 'substitute'],
-            'tempcorr': [-25, 25, False, 'substitute'],
-            'epotdist': [5, 20, False, 'substitute'],
-            'rrcs2': [0.0001, 1, True, 'multiply'],
-            'mperc1': [0.0001, 300, True, 'multiply'],
-            #'mperc1': [0.001, 10, False, 'multiply'],
-            'mperc2': [0.0001, 300, True, 'multiply'],
-            #'mperc2': [0.001, 10, False, 'multiply'],
-            'srrate': [0.0001, 1, True, 'substitute'],
-            #'srrate': [0.0001, 1, False, 'multiply'],
-            'lp': [0, 25, False, 'substitute'],
-            'kc': [0.001, 25, False, 'multiply'],
+        if parameter_bounds is not None:
+            self.parametersBounds = parameter_bounds
+        else:            
+            self.parametersBounds = {
+                'wcfc': [0.0001, 1, True, 'multiply'], 
+                #'wcfc': [0.0001, 1, False, 'multiply'],
+                'rrcs1': [0.0001, 5, True, 'multiply'],
+                'preccorr':[-1, 15, False, 'substitute'],
+                'tempcorr': [-25, 25, False, 'substitute'],
+                'epotdist': [5, 20, False, 'substitute'],
+                'rrcs2': [0.0001, 1, True, 'multiply'],
+                'mperc1': [0.0001, 300, True, 'multiply'],
+                #'mperc1': [0.001, 10, False, 'multiply'],
+                'mperc2': [0.0001, 300, True, 'multiply'],
+                #'mperc2': [0.001, 10, False, 'multiply'],
+                'srrate': [0.0001, 1, True, 'substitute'],
+                #'srrate': [0.0001, 1, False, 'multiply'],
+                'lp': [0, 25, False, 'substitute'],
+                'kc': [0.001, 25, False, 'multiply'],
 
-            #Lake related parameters
+                #Lake related parameters
 
-            # Outlet lake
-            'gratp': [0.0001, 10, True, 'substitute'],
-            'gratk': [0.001, 10, True, 'substitute'],
+                # Outlet lake
+                'gratp': [0.0001, 10, True, 'substitute'],
+                'gratk': [0.001, 10, True, 'substitute'],
 
-            # Internal lake
-            'gldepi': [0.01, 100, True, 'substitute'],
+                # Internal lake
+                'gldepi': [0.01, 100, True, 'substitute'],
 
-            #Snow Routine parameters
+                #Snow Routine parameters
 
-            ## Snow melt
-            'ttmp': [-3, 5, False, 'substitute'],
-            'cmlt': [0.001, 100, True, 'multiply'],
+                ## Snow melt
+                'ttmp': [-3, 5, False, 'substitute'],
+                'cmlt': [0.001, 100, True, 'multiply'],
 
-            # if model 2 is used, the following parameters are added
-            'snalbmin': [0.001, 1, True, 'multiply'],
-            'snalbmax': [0.001, 1, True, 'multiply'],
-            'cmrad': [0.001, 10, True, 'multiply'],
+                # if model 2 is used, the following parameters are added
+                'snalbmin': [0.001, 1, True, 'multiply'],
+                'snalbmax': [0.001, 1, True, 'multiply'],
+                'cmrad': [0.001, 10, True, 'multiply'],
 
-            ## Snow cover
-            'fscdist0': [0.001, 1, True, 'multiply'],
-            'fscdist1': [0.001, 10, True, 'multiply'],
-            'fscdistmax': [0.001, 1, True, 'multiply'],
-            'fsck1': [0.001, 2, True, 'substitute'],
-            'fsckexp': [0.000001, 0.0001, True, 'substitute'],
+                ## Snow cover
+                'fscdist0': [0.001, 1, True, 'multiply'],
+                'fscdist1': [0.001, 10, True, 'multiply'],
+                'fscdistmax': [0.001, 1, True, 'multiply'],
+                'fsck1': [0.001, 2, True, 'substitute'],
+                'fsckexp': [0.000001, 0.0001, True, 'substitute'],
 
-            #Glacier related parameters
+                #Glacier related parameters
 
-            ## Default glacier parameters
-            'glacttmp': [-10, 5, False, 'substitute'],
-            'glaccmlt': [0.001, 100, True, 'substitute'],
+                ## Default glacier parameters
+                'glacttmp': [-10, 5, False, 'substitute'],
+                'glaccmlt': [0.001, 100, True, 'substitute'],
 
-            ## Alternative glacier parameters (accounting with radiation)
-            'glaccmrad': [0.001, 101, True, 'substitute'],
-            'glaccmrefr': [0.001, 1, True, 'substitute'],
-            'glacalb': [0.001, 1, True, 'substitute'],
+                ## Alternative glacier parameters (accounting with radiation)
+                'glaccmrad': [0.001, 101, True, 'substitute'],
+                'glaccmrefr': [0.001, 1, True, 'substitute'],
+                'glacalb': [0.001, 1, True, 'substitute'],
 
-            #Douro recession testing
-            'rcgrw': [0.0001, 1, True, 'substitute'],
-            'trrcs': [0.0001, 1, True, 'multiply'],
-            'srrcs': [0.001, 1, True, 'multiply'],
-            'mactrinf': [0.001, 5, True, 'multiply'],
-            'macfrac': [0.001, 1, True, 'multiply'],
-            'srbeta': [0.0001, 20, True, 'substitute'],
-            'damp': [0.001, 1, True, 'substitute'],
-            'rivvel': [0.01, 100, True, 'substitute'],
-            'fscdist1': [0.001, 10, True, 'multiply'],
-        }
+                #Douro recession testing
+                'rcgrw': [0.0001, 1, True, 'substitute'],
+                'trrcs': [0.0001, 1, True, 'multiply'],
+                'srrcs': [0.001, 1, True, 'multiply'],
+                'mactrinf': [0.001, 5, True, 'multiply'],
+                'macfrac': [0.001, 1, True, 'multiply'],
+                'srbeta': [0.0001, 20, True, 'substitute'],
+                'damp': [0.001, 1, True, 'substitute'],
+                'rivvel': [0.01, 100, True, 'substitute'],
+                'fscdist1': [0.001, 10, True, 'multiply'],
+            }
 
         #Options for the model
         self.opts = {'init_random': random,
@@ -216,7 +173,7 @@ class HYPE():
         self.init_tmpFiles() 
         self.read_partxt(self.DefaultFolderLoc  / 'par.txt')
 
-    def set_simulation_Dates(self, init_date, final_date, b_init=None):
+    def set_simulation_Dates(self, init_date, final_date, b_init=None, records=None):
 
         if b_init is None:
            b_init = init_date
@@ -238,13 +195,18 @@ class HYPE():
                     else:
                         file.write(line)
 
+        if records is None:
+            self.records = pd.date_range(start=init_date, end=final_date, freq='D')
+        else:
+            self.records = records
+
     def remove_tmpFiles(self):
         shutil.rmtree(self.temp_dir)
         self.temp_dir = None
 
     def init_tmpFiles(self):
         self.temp_dir = Path(tempfile.TemporaryDirectory(prefix='GPU_HYPE', dir=None).name)
-        print(f'Simulations running in {self.temp_dir.absolute()}')
+        print(f'Simulations will be running in {self.temp_dir.absolute()}')
         for i in range(self.MultipleRuns):
             run_folder = self.temp_dir / f'Process{i}'
             run_folder.mkdir(parents=True, exist_ok=True)
@@ -785,6 +747,8 @@ def predictHYPEdec(func):
                                                       args[0].opt['forcePositive'])
                 
                 args[0].modelObject.delete_Pool()
+                args[0].modelObject.remove_tmpFiles()
+
                 return aggregated
             else:
                 print("Condition not met, running alternative action")

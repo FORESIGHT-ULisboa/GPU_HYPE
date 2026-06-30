@@ -31,8 +31,8 @@ requires_opencl = pytest.mark.skipif(
 
 @requires_opencl
 def test_core_imports():
-    import gpu  # noqa: F401
-    import gpu_pso
+    import GPU_HYPE.GPU.gpu as gpu  # noqa: F401
+    import GPU_HYPE.GPU.gpu_pso as gpu_pso
     from conceptual.HYPE import HYPE  # noqa: F401
     from error.errorOpenCL import Error  # noqa: F401
     from new_error_model import NewErrorModel  # noqa: F401
@@ -45,7 +45,7 @@ def test_load_pretrained_model():
     if not MODEL_PKL.exists():
         pytest.skip("bundled pre-trained model not present")
 
-    from gpu import GPU
+    from GPU_HYPE.GPU.gpu import GPU
 
     model = GPU.load(str(MODEL_PKL))
     assert model.trained is True

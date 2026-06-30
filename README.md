@@ -103,13 +103,13 @@ from pathlib import Path
 import pandas as pd
 from gpu_model.gpu_pso import GPU_PSO
 from gpu_model.gpu import GPU
-from error.errorOpenCL import NewErrorModel
+from error.error_model import NewErrorModel
 from conceptual.HYPE import HYPE
 
 # Observed discharge for the Türkheim outlet (subbasin 50675)
 y = pd.read_csv("demo_model/Qobs.txt", sep="\t", header=0,
                 index_col="Date", parse_dates=True)
-init, final = pd.to_datetime("1980-01-01"), pd.to_datetime("1989-12-31")
+init, final = pd.to_datetime("2001-01-01"), pd.to_datetime("2001-06-31")
 y = y.loc[(y.index >= init) & (y.index <= final)]
 
 # HYPE model + GPU error model
@@ -136,11 +136,8 @@ opt = GPU_PSO(modelObject=Model, errorObject=NewErrorModel(errorFunction="MAE"),
 
 result, performance = opt.fit(y, epochs=5)   # short demo run
 opt.modelObject.remove_tmpFiles()
-opt.save("examples/my_calibration.pkl")
+opt.save("notebook_results/my_calibration.pkl")
 ```
-
-To forecast with the bundled pre-trained model instead, see
-[`01_calibration_and_prediction`](notebooks/01_calibration_and_prediction.ipynb).
 
 ---
 

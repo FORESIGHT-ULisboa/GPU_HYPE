@@ -29,13 +29,12 @@ predictive uncertainty bands.
 | Category | What it provides |
 |---|---|
 | **Calibration** | `GPU_PSO` — multi-objective Particle-Swarm optimisation of HYPE parameters |
-| **Models** | `HYPE` (runs the HYPE executable in parallel) and `ANN` (OpenCL regressor) |
-| **Error models** | `Error` (OpenCL MAE/MSE kernels) and `NewErrorModel` (NumPy MAE/MSE/NSE) |
+| **Models** | `HYPE` (runs the HYPE executable in parallel) |
+| **Error models** | `NewErrorModel` (NumPy MAE/MSE/NSE) |
 | **Probabilistic output** | population → predictive uncertainty bands (default 16 levels) |
 | **Multi-objective** | reliability (non-exceedance) vs error, with NSGA-II sorting + crowding |
 | **Visualisation** | `Display` / `PlotGPU` — Pareto front, PIT/Q-Q reliability, hydrograph bands |
 | **Persistence** | `save` / `load` the whole optimiser as a pickle |
-| **Diagnostics** *(optional)* | `functions2` hydrographs and skill metrics via the companion `forecast_performance` package |
 
 ---
 
@@ -44,7 +43,7 @@ predictive uncertainty bands.
 ### 1 · Create a conda environment
 
 ```bat
-conda create -n gpu_hype python=3.8
+conda env create -f environment.yml
 conda activate gpu_hype
 ```
 
@@ -54,13 +53,6 @@ From the repository root:
 
 ```bat
 pip install -e ".[dev]"
-```
-
-The advanced diagnostics in `functions2.py` (used by the optional section of the
-results notebook) additionally need the companion `forecast_performance` package:
-
-```bat
-pip install -e ".[metrics]"
 ```
 
 ### 3 · Register the Jupyter kernel
@@ -82,17 +74,10 @@ jupyter lab notebooks\
 
 ## System requirements
 
-The runnable end-to-end pipeline targets **Windows with an OpenCL platform**:
+The runnable end-to-end pipeline targets **Windows**:
 
 - **Windows.** The HYPE model is invoked as `HYPEwithoutPopup4All.exe`
   (bundled in each HYPE folder) through `subprocess`.
-- **OpenCL.** Importing `gpu_pso` builds an OpenCL context, so a working OpenCL
-  platform must be available — a GPU, or a CPU OpenCL runtime. Check it with:
-  ```python
-  import pyopencl as cl
-  print(cl.get_platforms())
-  ```
-
 ---
 
 ## Core concepts
@@ -107,8 +92,7 @@ The runnable end-to-end pipeline targets **Windows with an OpenCL platform**:
   *population*, not a single parameter set.
 - **Probability bands.** The population's simulations are aggregated into
   predictive quantile bands (default
-  `[0.001, 0.01, 0.025, 0.05, 0.15, …, 0.95, 0.975, 0.99, 0.999]`), giving the
-  ensemble/probabilistic forecast.
+  `[0.01, 0.025, 0.05, 0.15, …, 0.95, 0.975, 0.99]`), giving the probabilistic forecast.
 
 ---
 
@@ -117,13 +101,13 @@ The runnable end-to-end pipeline targets **Windows with an OpenCL platform**:
 ```python
 from pathlib import Path
 import pandas as pd
-from gpu_pso import GPU_PSO
-from gpu import GPU
-from error.errorOpenCL import Error
+from gpu_model.gpu_pso import GPU_PSO
+from gpu_model.gpu import GPU
+from error.errorOpenCL import NewErrorModel
 from conceptual.HYPE import HYPE
 
 # Observed discharge for the Türkheim outlet (subbasin 50675)
-y = pd.read_csv("examples/Qobs.txt", sep="\t", header=0,
+y = pd.read_csv("demo_model/Qobs.txt", sep="\t", header=0,
                 index_col="Date", parse_dates=True)
 init, final = pd.to_datetime("1980-01-01"), pd.to_datetime("1989-12-31")
 y = y.loc[(y.index >= init) & (y.index <= final)]
@@ -132,11 +116,19 @@ y = y.loc[(y.index >= init) & (y.index <= final)]
 Model = HYPE(MultipleRuns=8, records=y.index,
              calibration_parameters=["wcfc", "rrcs1", "ttmp", "cmlt", "preccorr"],
              random=True, normalization=True, log=True,
-             HYPEfolder="examples/set7_germany_tuerkheim",
-             outfile="results/0050675.txt")
+             HYPEfolder="demo_model/HYPE_setup_folder",
+             outfile="results/0003587.txt")
+             parameter_bounds = { #Parameter bound
+                'wcfc': [0.0001, 1, True, 'substitute'], 
+                'rrcs1': [0.0001, 1, True, 'substitute'],
+                'rrcs2': [0.0001, 1, True, 'substitute'],
+                'preccorr': [0.0001, 1, True, 'substitute'],
+                'ttmp': [-3, 5, False, 'substitute'],
+            },
+          
 Model.set_simulation_Dates(init, final)
 
-opt = GPU_PSO(modelObject=Model, errorObject=Error(errorFunction="MAE"),
+opt = GPU_PSO(modelObject=Model, errorObject=NewErrorModel(errorFunction="MAE"),
               variables=len(Model.parList[0]), population=30,
               inertia=0.2, c1=0.3, c2=0.2, c3=0.001, pBins=10, partial=0.1,
               forcePositive=False, transformWeights=False,
@@ -148,7 +140,7 @@ opt.save("examples/my_calibration.pkl")
 ```
 
 To forecast with the bundled pre-trained model instead, see
-[`02_training_and_predicting`](notebooks/02_training_and_predicting.ipynb).
+[`01_calibration_and_prediction`](notebooks/01_calibration_and_prediction.ipynb).
 
 ---
 
@@ -156,19 +148,17 @@ To forecast with the bundled pre-trained model instead, see
 
 ```
 GPU_HYPE/
-├── gpu.py                      # abstract GPU engine: fit/predict/save/load, Display/PlotGPU
-├── gpu_pso.py                  # GPU_PSO — Particle-Swarm generate/select strategy
-├── domination.py, crowding.py  # NSGA-II non-dominated sorting + crowding distance
+├── gpu_model/
+    ├── gpu_pso.py                  # GPU_PSO — Particle-Swarm generate/select strategy
+    ├── gpu.py                      # Display / PlotGPU / GPU core
+    ├── domination.py, crowding.py  # NSGA-II non-dominated sorting + crowding distance
+    ├── functions.py                # band/quantile helpers used by the engine
+    ├── functions2.py               # optional diagnostics (needs forecast_performance)            
 ├── conceptual/
-│   └── HYPE.py                 # HYPE wrapper (runs the executable in parallel) + metaHYPE
+│   └── HYPE.py                     # HYPE wrapper (runs the executable in parallel) + metaHYPE
 ├── error/
-│   ├── errorOpenCL.py          # Error — OpenCL MAE/MSE objective
-│   ├── errorNumpy.py           # NumPy fallback
-│   └── evalMAE.cl, evalMSE.cl  # OpenCL kernels
-├── new_error_model.py          # NewErrorModel — NumPy MAE/MSE/NSE objective
-├── regression/                 # ANN regressor + activation kernels (alternative model)
-├── functions.py                # band/quantile helpers used by the engine
-├── functions2.py               # optional diagnostics (needs forecast_performance)
+│   └── error_model.py          # NewErrorModel — NumPy MAE/MSE/NSE objective
+
 ├── data.py                     # Data container for the ANN workflow
 ├── Trainer.py                  # end-to-end calibration script
 ├── DisplayPKL.py               # load and show a saved figure pickle
@@ -177,8 +167,8 @@ GPU_HYPE/
 │   ├── Qobs.txt                # observed discharge (subbasin 50675)
 │   ├── GPU_HYPE_2026-03-24_13h15.pkl          # pre-trained GPU_PSO model
 │   └── BestAutomaticCalibration_0050675.txt   # HYPE's own best calibration (baseline)
-├── Pickles/                    # small input/output sample for the ANN path
-├── notebooks/                  # 00_setup_and_data … 03_results
+├── notebooks/                  # 00_setup_and_data 01_calibration_and_prediction 
+├── notebooks_results/          # Store the results of the notebooks
 ├── tests/                      # smoke tests (skip without OpenCL / the HYPE exe)
 ├── AGENTS.md                   # conventions for AI coding agents (canonical)
 ├── CLAUDE.md                   # → points to AGENTS.md
@@ -223,11 +213,10 @@ OpenCL or the HYPE executable is unavailable.
 | `init_tmpFiles()` / `remove_tmpFiles()` | Create / delete the temporary parallel run folders. |
 | `compute()` | Run HYPE forward for the current parameter population. |
 
-### Error models
+### Error model
 
 | Class | Description |
 |---|---|
-| `Error(errorFunction="MAE")` *(`error/errorOpenCL.py`)* | OpenCL MAE/MSE objective; returns `(error, non_exceedance)`. |
 | `NewErrorModel(errorFunction="MAE", non_exceedance_threshold=0.0, logQopt=False)` *(`new_error_model.py`)* | NumPy MAE/MSE/NSE objective with optional log-space and thresholding. |
 
 ### Visualisation (`gpu.py`)
@@ -243,5 +232,5 @@ OpenCL or the HYPE executable is unavailable.
 ## License
 
 See [LICENSE](LICENSE) (GNU GPL v3). The bundled `HYPEwithoutPopup4All.exe` is the
-HYPE model by [SMHI](https://hypeweb.smhi.se/) and remains subject to its own
+HYPE model by [SMHI](https://hypeweb.smhi.se/) with slight modifications and remains subject to its own
 licence terms.
